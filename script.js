@@ -1,86 +1,77 @@
-// ================================
-// WORDLY DICTIONARY APP
-// ================================
+document.addEventListener("DOMContentLoaded", function () {
+  // Get elements from the HTML page
+  const form = document.getElementById("searchForm");
+  const input = document.getElementById("wordInput");
+  const result = document.getElementById("result");
+  const savedList = document.getElementById("savedWords");
 
-// Get elements from the HTML page
-const form = document.getElementById("searchForm");
-const input = document.getElementById("wordInput");
-const result = document.getElementById("result");
-const savedList = document.getElementById("savedWords");
+  // Array to store saved words
+  let savedWords = [];
 
-// Array to store saved words
-let savedWords = [];
+  // EVENT LISTENER
 
-// ======================================
-// EVENT LISTENER
-// Runs when the user submits the form
-// ======================================
-form.addEventListener("submit", function (e) {
-  // Prevent the page from refreshing
-  e.preventDefault();
+  form.addEventListener("submit", function (e) {
+    // Prevent the page from refreshing
+    e.preventDefault();
 
-  // Get the word entered by the user
-  const word = input.value.trim();
+    // Get the word entered by the user
+    const word = input.value.trim();
 
-  // If the input is empty, stop the function
-  if (word === "") {
-    alert("Please enter a word.");
-    return;
-  }
-
-  // Call the function to fetch data from the API
-  fetchWord(word);
-});
-
-// ======================================
-// FETCH WORD FUNCTION
-// Gets data from the Free Dictionary API
-// ======================================
-async function fetchWord(word) {
-  try {
-    // Send a request to the API
-    const response = await fetch(
-      `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
-    );
-
-    // If the response is not successful
-    if (!response.ok) {
-      throw new Error("Word not found.");
+    // If the input is empty, stop the function
+    if (word === "") {
+      alert("Please enter a word.");
+      return;
     }
 
-    // Convert the response into a JavaScript object
-    const data = await response.json();
+    // Call the function to fetch data from the API
+    fetchWord(word);
+  });
 
-    // Display the first object returned by the API
-    displayWord(data[0]);
-  } catch (error) {
-    // Display an error message if something goes wrong
-    result.innerHTML = `
+  // FETCH WORD FUNCTION
+  // Gets data from the Free Dictionary API
+  async function fetchWord(word) {
+    try {
+      // Send a request to the API
+      const response = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
+      );
+
+      // If the response is not successful
+      if (!response.ok) {
+        throw new Error("Word not found.");
+      }
+
+      const data = await response.json();
+
+      // Display the first object returned by the API
+      displayWord(data[0]);
+    } catch (error) {
+      // Display an error message if something goes wrong
+      result.innerHTML = `
             <p style="color:red;">
                 ${error.message}
             </p>
         `;
+    }
   }
-}
 
-// ======================================
-// DISPLAY WORD FUNCTION
-// Shows the word information on the page
-// ======================================
-function displayWord(data) {
-  // Get the first meaning
-  const meaning = data.meanings[0];
+  // DISPLAY WORD FUNCTION
+  // Shows the word information on the page
 
-  // Get the first definition
-  const definition = meaning.definitions[0];
+  function displayWord(data) {
+    // Get the first meaning
+    const meaning = data.meanings[0];
 
-  // Find the first pronunciation audio
-  const audio = data.phonetics.find(function (item) {
-    return item.audio !== "";
-  });
+    // Get the first definition
+    const definition = meaning.definitions[0];
 
-  // Display the information
-  result.innerHTML = `
+    // Find the pronunciation audio
+    const audio = data.phonetics.find(function (item) {
+      return item.audio !== "";
+    });
+
+    // Display the information
+    result.innerHTML = `
 
         <div class="card" id="wordCard">
 
@@ -128,51 +119,49 @@ function displayWord(data) {
 
     `;
 
-  // Add an event listener to the Save button
-  document.getElementById("saveBtn").addEventListener("click", function () {
-    // Save the current word
-    saveWord(data.word);
-  });
-}
-
-// ======================================
-// SAVE WORD FUNCTION
-// Adds a word to the saved list
-// ======================================
-function saveWord(word) {
-  // Check if the word is already saved
-  if (savedWords.includes(word)) {
-    alert("Word already saved.");
-    return;
+    // Add an event listener to the Save button
+    document.getElementById("saveBtn").addEventListener("click", function () {
+      // Save the current word
+      saveWord(data.word);
+    });
   }
 
-  // Add the word to the array
-  savedWords.push(word);
+  // SAVE WORD FUNCTION
+  // Adds a word to the saved list
+  function saveWord(word) {
+    // Check if the word is already saved
+    if (savedWords.includes(word)) {
+      alert("Word already saved.");
+      return;
+    }
 
-  // Display the updated saved words list
-  displaySavedWords();
+    // Add the word to the array
+    savedWords.push(word);
 
-  // Change the card border to green
-  document.getElementById("wordCard").classList.add("saved");
-}
+    // Display the updated saved words list
+    displaySavedWords();
 
-// ======================================
-// DISPLAY SAVED WORDS FUNCTION
-// Shows all saved words on the page
-// ======================================
-function displaySavedWords() {
-  // Clear the old list before displaying it again
-  savedList.innerHTML = "";
+    // Change the card border to green
+    document.getElementById("wordCard").classList.add("saved");
+  }
 
-  // Loop through every saved word
-  savedWords.forEach(function (word) {
-    // Create a new list item
-    const li = document.createElement("li");
+  // DISPLAY SAVED WORDS FUNCTION
+  // Shows all saved words on the page
 
-    // Put the word inside the list item
-    li.textContent = word;
+  function displaySavedWords() {
+    // Clear the old list before displaying it again
+    savedList.innerHTML = "";
 
-    // Add the list item to the page
-    savedList.appendChild(li);
-  });
-}
+    // Loop through every saved word
+    savedWords.forEach(function (word) {
+      // Create a new list item
+      const li = document.createElement("li");
+
+      // Put the word inside the list item
+      li.textContent = word;
+
+      // Add the list item to the page
+      savedList.appendChild(li);
+    });
+  }
+});
